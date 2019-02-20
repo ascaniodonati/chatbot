@@ -1,0 +1,225 @@
+﻿/*TABLE*/
+.table-datagrid{
+    border-top: none; 
+    border-left: none; 
+    border-right: none; 
+}
+.table-datagrid tbody tr:first-child th{
+    background: #ddd;
+    border-bottom-color: #ccc;
+    color: #333;  
+    border-top: none;
+    border-left: none;
+    border-right: none;  
+}
+.table-datagrid tbody tr:not(:first-child) td{
+    padding: 8px;
+    line-height: 1.428571429;
+    vertical-align: top;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid #ddd;
+}
+.footable-sort-indicator{
+    /*background-image: url(../images/arrow.gif);*/
+    display: block;
+    float: left;  
+    width: 10px;
+    height: 17px;  
+}
+.headerGrid th
+{
+    text-align:center;    
+}
+.headerGrid a{
+    color: #333; 
+    display: block;
+    float: left;   
+}
+.footable-sort-indicator {
+    /*background-image: url(../images/arrow.gif);*/
+    display: block;
+    float: left;
+    width: 10px;
+    height: 17px;
+}
+.ok td{
+    background-color: #ffacac !important;
+}
+
+/*CONTEXT MENU*/
+ul
+{
+list-style-type: none;
+padding: 0px;
+margin: 0px;
+}
+ul li
+{
+/*padding-left: 0px;
+line-height:20px;*/
+}   
+.grigliatoolbar
+{
+    top: auto;
+    margin-top: 16px;
+    }  
+.titleTab
+{
+    width: 90%;
+    float: left;
+    }   
+.show
+{
+    z-index:1000;
+    position: absolute;
+    display: block;
+    list-style-type: none;
+    list-style: none;
+    min-width: 160px;
+    padding: 5px;
+    margin: 2px 0 0;
+    font-size: 14px;
+    list-style: none;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    background-clip: padding-box;
+    }
+.show li{
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.428571429;
+    color: #333333;
+    white-space: nowrap;
+    cursor:pointer;
+}
+.green{
+    color: #00b16a;  
+}
+.yellow{
+    color: #f39c12;   
+}
+.red{
+    color: #e74c3c;   
+}
+.grey{
+    color: #95a5a6;
+}
+.right{
+    float: right;    
+}
+.icon-only:before{
+    margin-right: 0 !important;   
+}
+.icon-only{
+    float: right !important;     
+}
+.imgAppa{
+    width: 26px; 
+    height: 26px;  
+    padding: 3px;  
+    margin-right: 2px;
+    float: left;
+    border: 1px solid #0a68b4;
+    border-radius:3px;
+}
+.imgAppa:hover{
+    border: 1px solid #0a68b4;
+    border-radius:3px;  
+    cursor: pointer;
+}
+.imgAppa.pc{
+    background: url('../../../netWatch/images/pcR.gif') top center #fff;
+}
+.imgAppa.router{
+    background: url('../../../netWatch/images/routerR.gif') center center #fff;
+}
+.imgAppa.server{
+    background: url('../../../netWatch/images/serverR.gif') top center #fff;
+}
+.imgAppa.switch{
+    background: url('../../../netWatch/images/switchR.gif') center center #fff;
+}
+.imgAppa.stampante{
+    background: url('../../../netWatch/images/printer.gif') center center #fff;
+}
+.imgAppa.apparatoGenericoIcon{
+    background: url('../../../netWatch/images/apparatoGenericoR.gif') center center #fff;
+}
+.imgAppa.apparatoGenerico{
+    background: url('../../../netWatch/images/apparatoGenericoR.gif') top center #fff;
+}
+.imgAppa.phone{
+    background: url('../../../netWatch/images/phoneR.gif') top center #fff;
+}
+.imgAppa.lamp{
+    background: url('../../../netWatch/images/lampR.gif') top center #fff;
+}
+.imgAppa.pc:hover{
+    background: url('../../../netWatch/images/pcW.gif') top center #0c7cd5;
+}
+.imgAppa.router:hover{
+    background: url('../../../netWatch/images/routerW.gif') center center #0c7cd5;
+}
+.imgAppa.server:hover{
+    background: url('../../../netWatch/images/serverW.gif') top center #0c7cd5;
+}
+.imgAppa.switch:hover{
+    background: url('../../../netWatch/images/switchW.gif') center center #0c7cd5;
+}
+.imgAppa.apparatoGenerico:hover{
+    background: url('../../../netWatch/images/apparatoGenericoW.gif') top center #0c7cd5;
+}
+.imgAppa.phone:hover{
+    background: url('../../../netWatch/images/phoneW.gif') top center #0c7cd5;
+}
+.imgAppa.lamp:hover{
+    background: url('../../../netWatch/images/lampW.gif') top center #0c7cd5;
+}
+.gridView {
+	float: left;
+	margin-bottom: 30px !important;
+}
+.loading{
+    margin-left: 49%;
+    margin-top: 5%;    
+}
+.filter-counter-empty{
+    clear: both;    
+}
+.filter-counter-empty:before {
+    float: left;
+    width: 100%;
+}
+.testo{
+    padding-right: 10px;
+}
+.menuLi:hover{
+    color: #fff !important;
+    background-color: #0c7cd5 !important; 
+}
+.modal img{
+    max-width: 90%;
+    width: auto;
+    height: auto;
+}
+.chart-canvas{
+    height: 250px;    
+}
+.divtabella{
+    display: block;
+    float: left;
+    width: 20%;
+    margin-bottom: 20px;
+}
+.divtabella .gridView{
+    float: none;
+    margin-bottom: 10px !important;
+}

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<!-- saved from url=(0026)https://nms.vg/bottoni.asp -->
+<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <title></title>
+
+    <link href="./bootstrap.css" rel="stylesheet">
+    <link href="./myvem.css" rel="stylesheet">
+    <script src="./jquery-latest.js" type="text/javascript"></script>
+
+    <script src="./datiCbl.js" type="text/javascript"></script>
+    <script type="text/javascript" src="./menuveml.js"></script>
+
+    <script type="text/javascript">
+        function win_nav(pUrl,pW,pH){
+            var newloc=pUrl
+            	
+            if(pW==null)pW=830;
+            if(pH==null)pH=500;
+            								
+            //center
+            var BrsWw=screen.availWidth;//document.body.clientWidth;
+            var BrsWh=screen.availHeight;//document.body.clientHeight;
+            var popW=pW;
+            var popH=pH;
+            var leftPos=(BrsWw-popW)/2;
+            var topPos=(BrsWh-popH)/2;							
+            								
+            var fnstr=window.open(newloc,'','height='+ pH + ',width=' + pW + ',menubar=no,resizable=no,scrollbars=no,toolbar=no,fullscreen=0,top=' + topPos + ',left=' + leftPos);
+            fnstr.focus();
+        }
+    </script>
+
+    <script type="text/javascript">
+        window.onload = function(e){ 
+            
+            
+            var ua = navigator.userAgent;
+            var isiPad = /iPad/i.test(ua) || /iPhone OS 3_1_2/i.test(ua) || /iPhone OS 3_2_2/i.test(ua);
+            if (isiPad && window.location.protocol == 'https:') {
+                $.ajax({
+                    type: "GET"
+                        , url: "./controlloLoadIpad.asp"
+                        , dataType: 'html'
+                        , success: function (risposta) {
+
+                        }
+                        , error: function (risposta) {
+
+                        }
+                });
+            
+                // alert("pippo");
+                this.top.location.href = "https://nms.vg";
+            
+            }
+            
+            
+        }
+        $(document).ready(function () {
+
+            var sessione = setInterval(function () { uploadSession() }, 60000);
+            //$("#apibutton").css("visibility","hidden");
+            //nascondo i pulsanti
+            $("#btnleft").hide();
+            $("#btnleft").hide();
+
+            //aggancio l'evento resize
+            $(window).resize(function () {
+                winResize();
+            });
+
+            //eseguo un resize per visulizzare i pulsanti opportuni
+            winResize();
+
+            //aggancio gli eventi ai pulsanti
+            $("#btnleft").click(function (event) {
+                event.stopPropagation();
+                scrollMenu(true);
+            });
+            $("#btnright").click(function (event) {
+                event.stopPropagation();
+                scrollMenu(false);
+            });
+
+            $(".menutop").click(function (event) {
+                event.preventDefault();
+                parent.centrale.location = $(this)[0].href;
+                $.get("./statobottoni.asp?p=" + $(this)[0].id);
+                $('.menutop').removeAttr("style");
+                $(this).css({
+                    "background-color": "#ffffff",
+                    "color": "#0091ff",
+                    "zoom": "1"
+                });
+            });
+            $('#BUILDING').click(function(){
+                var pathSito;
+                
+                        pathSito = "https://mvc.nms.vg";
+                
+                _wakeUpApplicationPool(pathSito + '/BAImport');
+                _wakeUpApplicationPool(pathSito + '/GCL');
+                //_wakeUpApplicationPool(pathSito + '/netfacility');
+            });
+
+            function _wakeUpApplicationPool(url){
+                $.ajax({
+                    type: "GET", url: url, dataType: 'html'
+                    , success: function (risposta) {
+                        
+                    }, error: function (risposta) { 
+                        console.log('errore nella connessione con ' + url); 
+                    }
+                });
+            }
+        });
+
+        function scrollMenu(scrollLeft) {
+
+            //document.selection.clear();
+
+            var maxMargine;
+            var scrollWidth;
+            var dv = $("#voci_int");
+            var s = dv.css('margin-left');
+            var margine = parseInt(s);
+
+            if (!scrollLeft) {
+                $("#btnleft").show();
+                $("#btnleft").blur();
+
+                // cambio da visible a hidden perchè altrimenti firefox 
+                // ritorna scrollWidth == clientWidth
+
+                if (navigator.userAgent.match(/firefox/i)) {
+                    scrollWidth = dv.css("overflow", "hidden")[0].scrollWidth;
+                    dv.css("overflow", "visible");
+                } else {
+                    scrollWidth = dv[0].scrollWidth;
+                }
+
+                maxMargine = margine + dv[0].clientWidth - scrollWidth;
+                margine -= 40;
+                if (margine <= maxMargine) {
+                    $("#btnright").hide();
+                    margine = maxMargine;
+                }
+                //$("#debug").val(margine + ' - ' + maxMargine);
+            } else {
+                $("#btnright").show();
+                $("#btnright").blur();
+
+                margine += 40;
+
+                if (margine >= 0) {
+                    $("#btnleft").hide();
+                    margine = 0;
+                }
+            }
+
+            dv.css('margin-left', margine + 'px');
+
+            // rimuovo la selezione che a volte appare sui pulsanti
+
+            try {
+                if (window.getSelection) {
+                    if (window.getSelection().empty) {  // Chrome
+                        window.getSelection().empty();
+                    } else if (window.getSelection().removeAllRanges) {  // Firefox
+                        window.getSelection().removeAllRanges();
+                    }
+                } else if (document.selection) {  // IE?
+                    document.selection.empty();
+                }
+            }
+            catch (e) {
+            }
+            
+        }
+
+        function winResize() {
+
+            var s;
+            var margine;
+            var maxMargine;
+            var scrollWidth;
+            var dv = $("#voci_int");
+
+            //  alert(navigator.userAgent);
+
+            // cambio da visible a hidden perchè altrimenti firefox 
+            // ritorna scrollWidth == clientWidth
+
+            if (navigator.userAgent.match(/firefox/i)) {
+                scrollWidth = dv.css("overflow", "hidden")[0].scrollWidth;
+                dv.css("overflow", "visible");
+            } else {
+                scrollWidth = dv[0].scrollWidth;
+            }
+
+            if (dv[0].clientWidth < scrollWidth) {
+
+                s = dv.css('margin-left');
+                margine = parseInt(s);
+                maxMargine = margine + dv[0].clientWidth - scrollWidth;
+
+                if (margine > maxMargine) { //posso ancora andare a destra
+                    $("#btnright").show();
+                }
+
+                if (margine < 0) {   // sono andato a destra, quindi posso andare a sinistra
+                    $("#btnleft").show();
+                }
+            } else {
+                $(".freccia").hide();
+                dv.css('margin-left', '0px');
+            }
+        }
+
+
+        function loadingd() {
+            try {
+                var doc = iframeDocument(parent.document.getElementsByTagName('IFRAME')['centrale']);
+                makeLoadingDoc(doc);
+            } catch (e) {
+            }
+        }
+
+        function uscita() {
+            if (fCh)
+                event.returnValue = "Sono stati modificati dei dati e non salvati!!"
+            //return "Sono stati modificati dei dati e non salvati!!"
+        }
+
+        function uploadSession() {
+            var allarmi;
+            $.ajax({
+                type: "GET",
+                url: './uploadSession.aspx',
+                contentType: "text",
+                dataType: "text"
+            });
+        }
+    </script>
+
+    <style type="text/css">
+        table.but {
+            padding: 0;
+            border-spacing: 0;
+            width: 100%;
+            border-width: 0;
+            border: 0px solid #fff;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+            table.but td {
+                padding: 0px;
+                background-color: #0091FF;
+                line-height: 42px;
+                /* padding-left:5px;padding-right:5px; */
+                white-space: nowrap;
+                border-width: 0;
+                border: 0px solid #fff;
+                overflow: hidden;
+            }
+
+        .buttonsend {
+            margin-left: 8px;
+            margin-right: 8px;
+        }
+
+        td.logo {
+            width: 160px;
+            /*white-space: nowrap;*/
+        }
+        #btnright, #btnleft{
+            background-color: #0091FF;
+            border: 1px solid #fff;
+            border-radius: 20px 20px;
+        }
+        .icon-arrow-right{
+            background-image: url(../libs/bootstrap/2.2.2/img/glyphicons-halflings-white.png)!important;
+            background-repeat: no-repeat;
+        }
+        .icon-arrow-left{
+            background-image: url(../libs/bootstrap/2.2.2/img/glyphicons-halflings-white.png)!important;
+            background-repeat: no-repeat;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function azlogout()
+        {
+            //alert('logout');
+            try
+            {
+                
+                }
+            catch(e)
+            {
+            }
+        }
+    </script>
+
+
+    <script type="text/javascript">
+        var DASH_ENDPOINT = "https://dash.wattics.com";
+	
+        function logoutFromDashboard() {
+		  
+            //alert('logoutFromDashboard()');
+		  
+            var logout_url = DASH_ENDPOINT + '/logout';
+
+            xhr = createCORSRequest('DELETE', logout_url);
+            if (!xhr) {
+                //alert("CORS not supported");
+                return;
+            }
+
+            xhr.onload = function() {
+                //alert(xhr.responseText);
+                if (xhr.status === 200) {
+                    //alert("Succesfully logged out");
+                    //$("#frame").attr("src", homepage_url);
+                } else {
+                    //alert("An error occured");
+                }
+            };
+			
+            xhr.onerror = function() {
+                //alert("Cross-Origin request blocked");
+            };
+
+            xhr.send();
+		  
+            setTimeout(function(){ return true; }, 3000);
+		  
+            //alert('logoutFromDashboard() End');
+            //alert('Logout');
+        }
+	
+        // Create the XHR object.
+        function createCORSRequest(method, url) {
+            var xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+            if ("withCredentials" in xhr) { // XHR for Chrome/Firefox/Opera/Safari.
+                xhr.open(method, url, true);
+                xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            } else if (typeof XDomainRequest != "undefined") { // XDomainRequest for IE.
+                xhr = new XDomainRequest();
+                xhr.open(method, url);
+            } else {  // CORS not supported.
+                xhr = null;
+            }
+            return xhr;
+        }
+    </script>
+
+</head>
+
+<body onbeforeunload="uscita();" onunload="chiudiWin();">
+
+    <table id="tabesterna" class="but">
+        <tbody><tr>
+            <td class="logo" style="width: 192px;">
+                <img style="margin-left: 20px; margin-right: 20; margin-bottom: 3px; width: 120px;" alt="" src="./logo_new.svg"></td>
+
+            <td style="width: 36px; padding-left: 0px; padding-right: 2px;">
+                <button id="btnleft" class="buttonsend freccia" type="button" style="padding-left: 4px; padding-right: 4px; margin-top: -3px; display: none;"><i class="icon-arrow-left"></i></button>
+            </td>
+
+
+            <!--  <button id="btnleft" class="btn" type="button"><</button> -->
+
+            <!--    <td style="width:120px"><input  id="debug" type="text" value= "" /></td> -->
+
+            <td id="tdvoci">
+
+                <div id="voci_est" style="position: relative;">
+                    <div id="voci_int" style="position: relative; overflow: visible; margin-left: 0px">
+                        
+
+                        <!--		    
+                <a id="AMMINISTRA" class="menutop" onclick="loadingd();" href="amministra/amminist.asp" >Amministra</a>
+		    -->
+
+                        
+                        <a id="MONITORAGGIO" class="menutop" onclick="loadingd();" href="https://nms.vg/netwatch/monitor.asp">Monitoraggio</a>
+                        
+                        <a id="HELPDESK" class="menutop" onclick="loadingd();" href="https://nms.vg/helpdeskNew.asp">Helpdesk</a>
+                        
+                        <a id="DOCUMENTAZIONE" class="menutop" onclick="loadingd();" href="https://nms.vg/docum.asp">Documentazione</a>
+                        
+                        <a id="DASHBOARD" class="menutop" onclick="loadingd();" href="https://nms.vg/dashboard/index.asp" style="color:#0091ff; background-color:#ffffff;">Dashboard</a>
+                        
+                    </div>
+                </div>
+            </td>
+
+            <td style="width: 36px;">
+                <button id="btnright" class="buttonsend freccia" type="button" style="padding-left: 4px; padding-right: 4px; margin-top: -3px; display: none;"><i class="icon-arrow-right"></i></button>
+            </td>
+
+
+            <td id="tdsettings" style="width: 36px;"><span class="buttonsend"><a onclick="loadingd();" href="https://nms.vg/amministra/index.aspx" target="centrale"><i class="icon-wrench icon-white"></i></a></span></td>
+
+
+            <td id="tdpassword" style="width: 36px;"><span class="buttonsend"><a href="https://nms.vg/bottoni.asp#" onclick="win_nav(&#39;amministra/chpwd.aspx&#39;,500,500);" title="DemoVem"><i class="icon-user icon-white"></i></a></span></td>
+            <td id="tdlogout" style="width: 36px;"><span class="buttonsend"><a onclick="azlogout();" href="https://nms.vg/logout.aspx" target="_top" title="Chiudi la sessione"><i class="icon-off icon-white"></i></a></span></td>
+
+        </tr>
+    </tbody></table>
+
+    
+    <iframe name="ghost" scrolling="no" frameborder="0" height="0" width="0" src="./refrSess.html"></iframe>
+
+
+
+</body></html>

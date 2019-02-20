@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)https://nms.vg/dashboard/index.aspx -->
+<html xmlns="http://www.w3.org/1999/xhtml" class="support-js support-flexbox k-webkit k-webkit71"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <title>
+Test Dashboard
+</title>
+
+    <!--jquery-->
+    <script type="text/javascript" src="./jquery-1.11.0.js"></script>
+    <script type="text/javascript" src="./modernizr.js"></script>
+
+    <!--jquery ui-->
+    <script type="text/javascript" src="./jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="./jquery-ui.css">
+
+    <!--bootstrap main-->
+    <link rel="stylesheet" type="text/css" href="./myvem-net.css">
+    <script type="text/javascript" src="./bootstrap.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="./an_grid.css">
+
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="/libs/bootstrap/3.3.0/js/polyfill.js"></script>
+    <![endif]-->
+    
+    
+    <!--vemcomponents main>-->
+    <script type="text/javascript" src="./grafico.js"></script>
+    <script type="text/javascript" src="./gestionecomponenti.js"></script>
+    
+
+    
+    <!--kendo-->
+    <script type="text/javascript" src="./kendo.all.min.js"></script>
+    <script type="text/javascript" src="./kendo.culture.it-IT.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./kendo.common.min.css">
+    <link rel="Stylesheet" type="text/css" href="./kendo.vem.min.css">
+    
+
+    
+
+    
+
+    
+
+    
+    <script type="text/javascript">
+        var chartsList = [];
+		var selectorValues = new Object();
+		var rootFolderJ = '/';
+		var currentTS1;
+        var currentTS2;
+    </script>
+    
+
+    <script>
+
+        function PageLoadRangeChanged(datai, dataf) {
+            UpdateVemComponents(datai, dataf, true);
+        }
+
+        function ClientRangeChanged(datai, dataf) {
+            //alert("ClientRangeChanged" + currentTS1);
+            UpdateVemComponents(datai, dataf, false);
+        }
+
+        function timeRangeChanged(datai, dataf) {
+            ClientRangeChanged(datai, dataf);
+        }
+
+        function UpdateVemComponents(datai, dataf, firstLoad) {
+
+            try {
+
+                var thischart;
+                for (var i = 0; i < chartsList.length; i++) {
+
+                    try {
+
+                        if ($("#" + chartsList[i])[0].className == "chart-canvas k-chart") {
+                            if (!firstLoad) {
+                                thischart = $("#" + chartsList[i]).data("kendoChart");
+                            }
+                        }
+                        else if ($("#" + chartsList[i])[0].className.indexOf("k-grid") >= 0) {
+                            thischart = $("#" + chartsList[i]).data("kendoGrid");
+                        }
+                        else if ($("#" + chartsList[i])[0].className == "vem-generico") {
+                            thischart = $("#" + chartsList[i])[0];
+                        }
+                        //jqgrid manager
+                        else if ($("#" + chartsList[i])[0].className == "ui-jqgrid-btable") {
+                            thischart = $("#" + chartsList[i])[0];
+                        }
+
+                        else if ($("#" + chartsList[i])[0].className == "stats") {
+                            thischart = $("#" + chartsList[i])[0];
+                        }
+
+                        else if ($("#" + chartsList[i])[0].className == "gdiv") {
+                            thischart = $("#" + chartsList[i])[0];
+                        }
+
+                        else if ($("#" + chartsList[i])[0].className == "filter-counter-empty") {
+                            thischart = $("#" + chartsList[i])[0];
+                        }
+
+                        else {
+                            if ($("#" + chartsList[i])[0].className != "k-gauge") {
+                                //alert($("#" + chartsList[i])[0].className);
+                            }
+                        }
+
+                        try {
+
+                            if (thischart != null) {
+                                thischart.refreshvem(d2unixts(datai), d2unixts(dataf));
+                            }
+                        }
+                        catch (e) {
+                            //alert(e);
+                        }
+                    }
+                    catch (e) { 
+                        
+                    }
+                }
+            }
+            catch (e) {
+                //alert(e);
+            }
+        }
+
+        
+        function d2unixts_old(dt) {
+            try {
+                //alert("pippo");
+                Date.prototype.stdTimezoneOffset = function () {
+                    var jan = new Date(this.getFullYear(), 0, 1);
+                    var jul = new Date(this.getFullYear(), 6, 1);
+                    return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+                }
+
+                Date.prototype.dst = function () {
+                    return this.getTimezoneOffset() < this.stdTimezoneOffset();
+                }
+
+                if (dt.dst()) {
+                    return (Math.round((dt).getTime() / 1000));
+                } else {
+                    return (Math.round((dt).getTime() / 1000) - (new Date().getTimezoneOffset()) * 60);
+                }
+        
+            }
+            catch(e) {
+                return null;
+            }
+        }
+        
+
+        function d2unixts(dt) {
+            try {
+                return (Math.round((dt).getTime() / 1000) - (dt.getTimezoneOffset()) * 60);
+            }
+            catch(e) {
+                return null;
+            }
+        }
+
+        /***************Apretura menu grafico****************/
+        function apriMenuExport(ev, componente) {
+
+            var st = '';
+           
+           
+            st += "<ul>";
+               
+            st += "<li class=\"menuLi exportExcel\" onmouseout=\"style.color='#000';\" onclick=\"exportExcel(\'" + componente + "\')\">Excel</li>"
+               
+            st += "<li class=\"menuLi exportPdf\" onmouseout=\"style.color='#000';\" onclick=\"exportPdf(\'" + componente + "\')\">Pdf</li>";
+            st += "</ul>";
+ 
+            getCtxMenu().innerHTML =  st;
+
+            ab_menu();
+            pop('divProp', ev);  
+            document.onmousedown = "";
+
+            //$('.exportPdf').click(function(){
+            //    alert("pippo");
+            //    exportPdf(componente);
+            //});
+
+            //$('.exportExcel').click(function(){
+            //    alert("pippo2");
+            //    exportExcel(componente);
+            //});
+        }
+
+        function exportExcel(idGrafico){
+            
+
+                //if(!idGrafico)
+                //{
+                //    //not kendo..
+
+                //    //try keyvaluetable
+                //    idGrafico=componente.parents().find('.gdiv').attr('id');
+                //}
+
+                var $component = $('#' + idGrafico);
+
+                var classe = $component.attr('class');
+
+                var url="";
+
+                if(classe=='gdiv') //chiave-valore
+                {
+                    url = document.getElementById($component.attr("id")).geturl();
+                }
+                else
+                {
+                    //kendo chart
+                    url = $component.getKendoChart().dataSource.transport.options.read.url;
+                }
+
+                urlFinale =  url.replace("datigrafico", "datigraficoExcel");
+                                        
+                
+
+                if(url.length>0)
+                {
+                    document.location.href = urlFinale;
+                }
+        }
+        function exportPdf(componente){
+            var svgString = "";
+     
+            var thischart = $('#' + componente).data("kendoChart");
+            svgString = svgString + "|" + escape(thischart.svg());
+
+            var url = thischart.dataSource.transport.options.read.url;
+            var qs = getQueryString(url);
+            var oggetto = qs["ide_1"];
+
+            event.preventDefault();
+            var form = '<form action="/exportgrafici/esportaGrafico.aspx" method="POST" id="formexport"></form>';
+
+            $('body').append(form);
+            $('#formexport').html('<input name="tipoexport" value="pdf" type="hidden" /><input name="nomeGrafico" value="" type="hidden" />' +
+                '<input name="datiExport" value="titolo:' + $('#' + componente).parents('.panel').find('.panel-title').text() + '|dataInizio:' + stringDateI + '|dataFine:' + stringDateF + '" type="hidden" />' + 
+                '<input name="svg" value="' + svgString +'" type="hidden" /><input name="idogg" value="' + oggetto +'" type="hidden" />');
+            
+            $('#formexport').submit();
+        }
+
+        /************FINE Apretura menu grafico**************/
+
+        function getQueryString(url) {
+            var assoc = {};
+            var decode = function (s) { return decodeURIComponent(s.replace(/\+/g, " ")); };
+            var queryString = url.substring(url.indexOf("?") + 1);
+            var keyValues = queryString.split('&');
+
+            for (var i = 0; i < keyValues.length; i++) {
+                var key = keyValues[i].split('=');
+                if (key.length > 1) {
+                    assoc[decode(key[0])] = decode(key[1]);
+                }
+            }
+
+            return assoc;
+        }
+    </script>
+
+    
+
+    
+    <link rel="stylesheet" href="./jquery.jgrowl.css" type="text/css">
+<script type="text/javascript" src="./jquery.jgrowl.js"></script>
+<style type="text/css">
+    .panel-row{
+        margin: auto;
+    }
+    .chart-canvas{
+        height: 250px;    
+    }
+    #jGrowl div{
+        color: #fff !important;    
+    }
+    #jGrowl div a{
+        color: #fff !important;    
+        text-decoration: underline;
+    }
+</style>
+
+    
+    <style>
+        #helpbody > ul > li{
+            list-style-type: disc;
+        }
+        
+        #helpbody > ul,#helpbody > ol,#helpbody > dl
+        {
+	        /* IE7: reset rtl list margin. (#7334) */
+	        margin-right: 0px;
+	        /* preserved spaces for list items with text direction other than the list. (#6249,#8049)*/
+	        padding: 0 40px;
+        }
+
+        #editForm .modal-body {
+        height: 500px;
+        overflow-y: scroll;
+        }
+        .refreshComponenti{
+            line-height: 16px !important;
+        }
+        #customModal .modal-body label {
+            cursor: move;
+        }
+    </style>
+    
+<style></style></head>
+<body class="vem-masterpage-template" data-triggers="vem-masterpage-template" style="">
+    
+    
+
+    
+
+    <h1 class="main-title">
+    
+    </h1>
+
+    
+    
+	<ul id="maintoolbar" class="toolbar">
+    
+
+    
+        <li class="toolbar-help"><a data-toggle="modal" href="https://nms.vg/dashboard/index.aspx#helpModal">Help</a></li>
+        
+
+    
+	</ul>
+
+    
+
+    
+    <div class="filter" style="display: none;">
+
+    
+    
+    </div>
+    
+ 
+
+
+    <div>
+    <div>
+    <ul class="nav nav-pills">
+		
+		<li><a href="https://nms.vg/dashboard/listnews.aspx">Ultime news</a></li>
+        
+		<li><a href="https://nms.vg/dashboard/setup.aspx" class="menu">Impostazioni</a></li>
+            
+            <li><a href="https://nms.vg/dashboard/connnegozi.aspx" class="menu">Connettività negozi</a></li>
+            
+	</ul>
+    </div>
+    &nbsp;
+    </div>	    
+
+		    <div class="panel-row"><div class="panel"><h2 class="panel-title">Aggiornamenti odierni Net.Inventory</h2><div class="panel-body"><div class="chart chart-line"><div id="containerGrafico1" class="chart-canvas k-chart" data-role="chart" style="position: relative; visibility: visible;"><!--?xml version='1.0' ?--><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="658px" height="250px" style="position: relative; display: block;"><defs id="k10055"><clippath id="k10056"><path style="display: block; " d="M51 12 652 12 652 202 51 202 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></clippath></defs><path style="display: block; " d="M0 0 658 0 658 250 0 250 z" stroke="" stroke-width="0" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#fff"></path><path style="display: block; " d="M51.5 12.5 652.5 12.5 652.5 202.5 51.5 202.5 z" stroke-width="0.1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path id="k10017" style="display: block; " data-model-id="k10018" d="M51 12 652 12 652 202 51 202 z" stroke="" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><g id="k10021"><path style="display: block; " data-model-id="k10018" d="M51.5 178.5 652.5 178.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10018" d="M51.5 155.5 652.5 155.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10018" d="M51.5 131.5 652.5 131.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10018" d="M51.5 107.5 652.5 107.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10018" d="M51.5 83.5 652.5 83.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10018" d="M51.5 60.5 652.5 60.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10018" d="M51.5 36.5 652.5 36.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10018" d="M51.5 12.5 652.5 12.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10018" d="M652.5 12.5 652.5 202.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M51.5 202.5 652.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M51.5 202.5 51.5 206.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M652.5 202.5 652.5 206.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><g id="k10013" clip-path="url(#k10056)"><g id="k10022"><g><path id="k10012" style="display: block; " data-model-id="k10164" d="M369.5 69.5 459.5 69.5 459.5 202.5 369.5 202.5 z" stroke="#b93d30" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#e74c3c"></path><path id="k10163" style="display: block; " data-model-id="k10164" d="M369.5 69.5 459.5 69.5 459.5 202.5 369.5 202.5 z" stroke="#b93d30" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g><g><path id="k10014" style="display: block; " data-model-id="k10166" d="M495.5 24.5 585.5 24.5 585.5 202.5 495.5 202.5 z" stroke="#633ecc" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#7c4dff"></path><path id="k10165" style="display: block; " data-model-id="k10166" d="M495.5 24.5 585.5 24.5 585.5 202.5 495.5 202.5 z" stroke="#633ecc" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g></g></g><path style="display: block; " d="M51.5 12.5 51.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 202.5 51.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 178.5 51.5 178.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 155.5 51.5 155.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 131.5 51.5 131.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 107.5 51.5 107.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 83.5 51.5 83.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 60.5 51.5 60.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 36.5 51.5 36.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 12.5 51.5 12.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><text id="k10167" data-model-id="k10168" x="35" y="206" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">0</text><text id="k10169" data-model-id="k10170" x="29" y="182" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">10</text><text id="k10171" data-model-id="k10172" x="29" y="159" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">20</text><text id="k10173" data-model-id="k10174" x="29" y="135" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">30</text><text id="k10175" data-model-id="k10176" x="29" y="111" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">40</text><text id="k10177" data-model-id="k10178" x="29" y="87" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">50</text><text id="k10179" data-model-id="k10180" x="29" y="64" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">60</text><text id="k10181" data-model-id="k10182" x="29" y="40" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">70</text><text id="k10183" data-model-id="k10184" x="29" y="16" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">80</text><g transform="matrix(6.123233995736766e-17,-1,1,6.123233995736766e-17,-90,123.5)"><text x="10" y="111" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">pc</text></g></g><g><path style="display: block; " data-model-id="k10186" d="M53.5 225.5 60.5 225.5 60.5 232.5 53.5 232.5 z" stroke="#2196f3" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#2196f3"></path><text id="k10185" data-model-id="k10186" x="67" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">pc nuovi registrati oggi</text><path style="display: block; cursor: pointer;" data-model-id="k10186" d="M52 221 187 221 187 235 52 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><path style="display: block; " data-model-id="k10188" d="M194.5 225.5 201.5 225.5 201.5 232.5 194.5 232.5 z" stroke="#f1c40f" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#f1c40f"></path><text id="k10187" data-model-id="k10188" x="208" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">pc con modifiche black list</text><path style="display: block; cursor: pointer;" data-model-id="k10188" d="M193 221 347 221 347 235 193 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><path style="display: block; " data-model-id="k10190" d="M354.5 225.5 361.5 225.5 361.5 232.5 354.5 232.5 z" stroke="#e74c3c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#e74c3c"></path><text id="k10189" data-model-id="k10190" x="368" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">pc con modifiche hw</text><path style="display: block; cursor: pointer;" data-model-id="k10190" d="M353 221 477 221 477 235 353 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><path style="display: block; " data-model-id="k10192" d="M484.5 225.5 491.5 225.5 491.5 232.5 484.5 232.5 z" stroke="#7c4dff" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#7c4dff"></path><text id="k10191" data-model-id="k10192" x="498" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">pc con modifiche sw</text><path style="display: block; cursor: pointer;" data-model-id="k10192" d="M483 221 606 221 606 235 483 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path></g></svg></div><div id="containerGrafico1DivLoader" style="top: -125px; position: relative; background-image: url(&quot;/images/ajax-loader1.gif&quot;); width: 31px; height: 31px; z-index: 1000; margin: auto; display: none;"></div></div></div></div><div class="panel"><h2 class="panel-title">Stato aggiornamento agent</h2><div class="panel-body"><div class="chart chart-line"><div id="containerGrafico2" class="chart-canvas k-chart" data-role="chart" style="position: relative; visibility: visible;"><!--?xml version='1.0' ?--><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="658px" height="250px" style="position: relative; display: block; left: -0.796875px; top: 0px;"><defs id="k10002"><clippath id="k10001"><path style="display: block; " d="M58 12 652 12 652 202 58 202 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></clippath></defs><path style="display: block; " d="M0 0 658 0 658 250 0 250 z" stroke="" stroke-width="0" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#fff"></path><path style="display: block; " d="M58.5 12.5 652.5 12.5 652.5 202.5 58.5 202.5 z" stroke-width="0.1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path id="k10039" style="display: block; " data-model-id="k10040" d="M58 12 652 12 652 202 58 202 z" stroke="" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><g id="k10041"><path style="display: block; " data-model-id="k10040" d="M58.5 155.5 652.5 155.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10040" d="M58.5 107.5 652.5 107.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10040" d="M58.5 60.5 652.5 60.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10040" d="M58.5 12.5 652.5 12.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10040" d="M652.5 12.5 652.5 202.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M58.5 202.5 652.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M58.5 202.5 58.5 206.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M652.5 202.5 652.5 206.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><g id="k10000" clip-path="url(#k10001)"><g id="k10083"><g><path id="k10026" style="display: block; " data-model-id="k10081" d="M142.5 199.5 254.5 199.5 254.5 202.5 142.5 202.5 z" stroke="#1a78c2" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#2196f3"></path><path id="k10082" style="display: block; " data-model-id="k10081" d="M142.5 199.5 254.5 199.5 254.5 202.5 142.5 202.5 z" stroke="#1a78c2" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g><g><path id="k10025" style="display: block; " data-model-id="k10079" d="M299.5 65.5 411.5 65.5 411.5 202.5 299.5 202.5 z" stroke="#c19d0c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#f1c40f"></path><path id="k10080" style="display: block; " data-model-id="k10079" d="M299.5 65.5 411.5 65.5 411.5 202.5 299.5 202.5 z" stroke="#c19d0c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g><g><path id="k10027" style="display: block; " data-model-id="k10077" d="M456.5 201.5 568.5 201.5 568.5 202.5 456.5 202.5 z" stroke="#b93d30" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#e74c3c"></path><path id="k10078" style="display: block; " data-model-id="k10077" d="M456.5 201.5 568.5 201.5 568.5 202.5 456.5 202.5 z" stroke="#b93d30" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g></g></g><path style="display: block; " d="M58.5 12.5 58.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M54.5 202.5 58.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M54.5 155.5 58.5 155.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M54.5 107.5 58.5 107.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M54.5 60.5 58.5 60.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M54.5 12.5 58.5 12.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><text id="k10076" data-model-id="k10075" x="42" y="206" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">0</text><text id="k10074" data-model-id="k10073" x="29" y="159" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">100</text><text id="k10072" data-model-id="k10071" x="29" y="111" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">200</text><text id="k10070" data-model-id="k10069" x="29" y="64" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">300</text><text id="k10068" data-model-id="k10067" x="29" y="16" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">400</text><g transform="matrix(6.123233995736766e-17,-1,1,6.123233995736766e-17,-90,123.5)"><text x="10" y="111" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">pc</text></g></g><g><path style="display: block; " data-model-id="k10044" d="M129.5 225.5 136.5 225.5 136.5 232.5 129.5 232.5 z" stroke="#2196f3" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#2196f3"></path><text id="k10066" data-model-id="k10044" x="143" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">inseriti manualmente</text><path style="display: block; cursor: pointer;" data-model-id="k10044" d="M127.5 221 253.5 221 253.5 235 127.5 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><path style="display: block; " data-model-id="k10046" d="M261.5 225.5 268.5 225.5 268.5 232.5 261.5 232.5 z" stroke="#f1c40f" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#f1c40f"></path><text id="k10043" data-model-id="k10046" x="275" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">agent ultima ver.(3.016)</text><path style="display: block; cursor: pointer;" data-model-id="k10046" d="M259.5 221 400.5 221 400.5 235 259.5 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><path style="display: block; " data-model-id="k10048" d="M408.5 225.5 415.5 225.5 415.5 232.5 408.5 232.5 z" stroke="#e74c3c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#e74c3c"></path><text id="k10045" data-model-id="k10048" x="422" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">agent non aggiornati</text><path style="display: block; cursor: pointer;" data-model-id="k10048" d="M406.5 221 530.5 221 530.5 235 406.5 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path></g></svg></div><div id="containerGrafico2DivLoader" style="top: -125px; position: relative; background-image: url(&quot;/images/ajax-loader1.gif&quot;); width: 31px; height: 31px; z-index: 1000; margin: auto; display: none;"></div></div></div></div></div><div class="panel-row"><div class="panel"><h2 class="panel-title">Allarmi attivi</h2><div class="panel-body"><div class="chart chart-line"><div id="containerGrafico3" class="chart-canvas k-chart" data-role="chart" style="position: relative; visibility: visible;"><!--?xml version='1.0' ?--><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="658px" height="250px" style="position: relative; display: block;"><defs id="k10016"><clippath id="k10015"><path style="display: block; " d="M45 12 652 12 652 202 45 202 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></clippath></defs><path style="display: block; " d="M0 0 658 0 658 250 0 250 z" stroke="" stroke-width="0" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#fff"></path><path style="display: block; " d="M45.5 12.5 652.5 12.5 652.5 202.5 45.5 202.5 z" stroke-width="0.1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path id="k10064" style="display: block; " data-model-id="k10057" d="M45 12 652 12 652 202 45 202 z" stroke="" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><g id="k10054"><path style="display: block; " data-model-id="k10057" d="M45.5 175.5 652.5 175.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10057" d="M45.5 148.5 652.5 148.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10057" d="M45.5 121.5 652.5 121.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10057" d="M45.5 93.5 652.5 93.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10057" d="M45.5 66.5 652.5 66.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10057" d="M45.5 39.5 652.5 39.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10057" d="M45.5 12.5 652.5 12.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10057" d="M652.5 12.5 652.5 202.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M45.5 202.5 652.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M45.5 202.5 45.5 206.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M652.5 202.5 652.5 206.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><g id="k10037" clip-path="url(#k10015)"><g id="k10101"><g><path id="k10036" style="display: block; " data-model-id="k10099" d="M162.5 39.5 317.5 39.5 317.5 202.5 162.5 202.5 z" stroke="#b93d30" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#e74c3c"></path><path id="k10100" style="display: block; " data-model-id="k10099" d="M162.5 39.5 317.5 39.5 317.5 202.5 162.5 202.5 z" stroke="#b93d30" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g><g><path id="k10038" style="display: block; " data-model-id="k10097" d="M380.5 93.5 535.5 93.5 535.5 202.5 380.5 202.5 z" stroke="#c19d0c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#f1c40f"></path><path id="k10098" style="display: block; " data-model-id="k10097" d="M380.5 93.5 535.5 93.5 535.5 202.5 380.5 202.5 z" stroke="#c19d0c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g></g></g><path style="display: block; " d="M45.5 12.5 45.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M41.5 202.5 45.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M41.5 175.5 45.5 175.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M41.5 148.5 45.5 148.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M41.5 121.5 45.5 121.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M41.5 93.5 45.5 93.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M41.5 66.5 45.5 66.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M41.5 39.5 45.5 39.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M41.5 12.5 45.5 12.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><text id="k10096" data-model-id="k10095" x="29" y="206" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">0</text><text id="k10094" data-model-id="k10093" x="29" y="179" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">1</text><text id="k10092" data-model-id="k10059" x="29" y="152" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">2</text><text id="k10058" data-model-id="k10061" x="29" y="125" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">3</text><text id="k10060" data-model-id="k10063" x="29" y="97" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">4</text><text id="k10062" data-model-id="k10065" x="29" y="70" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">5</text><text id="k10106" data-model-id="k10107" x="29" y="43" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">6</text><text id="k10104" data-model-id="k10105" x="29" y="16" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">7</text><g transform="matrix(6.123233995736766e-17,-1,1,6.123233995736766e-17,-90,135.5)"><text x="10" y="111" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">Allarmi</text></g></g><g><path style="display: block; " data-model-id="k10103" d="M220.5 225.5 227.5 225.5 227.5 232.5 220.5 232.5 z" stroke="#e74c3c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#e74c3c"></path><text id="k10102" data-model-id="k10103" x="234" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">Allarmi critici</text><path style="display: block; cursor: pointer;" data-model-id="k10103" d="M218.5 221 300.5 221 300.5 235 218.5 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><path style="display: block; " data-model-id="k10050" d="M308.5 225.5 315.5 225.5 315.5 232.5 308.5 232.5 z" stroke="#f1c40f" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#f1c40f"></path><text id="k10047" data-model-id="k10050" x="322" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">Allarmi di media entità</text><path style="display: block; cursor: pointer;" data-model-id="k10050" d="M306.5 221 439.5 221 439.5 235 306.5 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path></g></svg></div><div id="containerGrafico3DivLoader" style="top: -125px; position: relative; background-image: url(&quot;/images/ajax-loader1.gif&quot;); width: 31px; height: 31px; z-index: 1000; margin: auto; display: none;"></div></div></div></div><div class="panel"><h2 class="panel-title">Stato assets</h2><div class="panel-body"><div class="chart chart-line"><div id="containerGrafico4" class="chart-canvas k-chart" data-role="chart" style="position: relative; visibility: visible;"><!--?xml version='1.0' ?--><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="658px" height="250px" style="position: relative; display: block; left: -0.796875px; top: 0px;"><defs id="k10031"><clippath id="k10030"><path style="display: block; " d="M51 12 652 12 652 202 51 202 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></clippath></defs><path style="display: block; " d="M0 0 658 0 658 250 0 250 z" stroke="" stroke-width="0" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#fff"></path><path style="display: block; " d="M51.5 12.5 652.5 12.5 652.5 202.5 51.5 202.5 z" stroke-width="0.1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path id="k10019" style="display: block; " data-model-id="k10005" d="M51 12 652 12 652 202 51 202 z" stroke="" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><g id="k10004"><path style="display: block; " data-model-id="k10005" d="M51.5 181.5 652.5 181.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10005" d="M51.5 160.5 652.5 160.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10005" d="M51.5 139.5 652.5 139.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10005" d="M51.5 118.5 652.5 118.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10005" d="M51.5 96.5 652.5 96.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10005" d="M51.5 75.5 652.5 75.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10005" d="M51.5 54.5 652.5 54.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10005" d="M51.5 33.5 652.5 33.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10005" d="M51.5 12.5 652.5 12.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " data-model-id="k10005" d="M652.5 12.5 652.5 202.5" stroke="#dfdfdf" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M51.5 202.5 652.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M51.5 202.5 51.5 206.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M652.5 202.5 652.5 206.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><g id="k10029" clip-path="url(#k10030)"><g id="k10156"><g><path id="k10028" style="display: block; " data-model-id="k10154" d="M118.5 33.5 208.5 33.5 208.5 202.5 118.5 202.5 z" stroke="#1a78c2" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#2196f3"></path><path id="k10155" style="display: block; " data-model-id="k10154" d="M118.5 33.5 208.5 33.5 208.5 202.5 118.5 202.5 z" stroke="#1a78c2" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g><g><path id="k10052" style="display: block; " data-model-id="k10152" d="M244.5 23.5 334.5 23.5 334.5 202.5 244.5 202.5 z" stroke="#c19d0c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#f1c40f"></path><path id="k10153" style="display: block; " data-model-id="k10152" d="M244.5 23.5 334.5 23.5 334.5 202.5 244.5 202.5 z" stroke="#c19d0c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g><g><path id="k10051" style="display: block; " data-model-id="k10150" d="M369.5 107.5 459.5 107.5 459.5 202.5 369.5 202.5 z" stroke="#b93d30" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#e74c3c"></path><path id="k10151" style="display: block; " data-model-id="k10150" d="M369.5 107.5 459.5 107.5 459.5 202.5 369.5 202.5 z" stroke="#b93d30" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g><g><path id="k10053" style="display: block; " data-model-id="k10148" d="M495.5 107.5 585.5 107.5 585.5 202.5 495.5 202.5 z" stroke="#633ecc" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#7c4dff"></path><path id="k10149" style="display: block; " data-model-id="k10148" d="M495.5 107.5 585.5 107.5 585.5 202.5 495.5 202.5 z" stroke="#633ecc" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path></g></g></g><path style="display: block; " d="M51.5 12.5 51.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 202.5 51.5 202.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 181.5 51.5 181.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 160.5 51.5 160.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 139.5 51.5 139.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 118.5 51.5 118.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 96.5 51.5 96.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 75.5 51.5 75.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 54.5 51.5 54.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 33.5 51.5 33.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><path style="display: block; " d="M47.5 12.5 51.5 12.5" stroke="#8e8e8e" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="none"></path><text id="k10147" data-model-id="k10146" x="35" y="206" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">0</text><text id="k10145" data-model-id="k10144" x="35" y="185" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">2</text><text id="k10143" data-model-id="k10142" x="35" y="164" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">4</text><text id="k10141" data-model-id="k10035" x="35" y="143" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">6</text><text id="k10034" data-model-id="k10033" x="35" y="122" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">8</text><text id="k10032" data-model-id="k10020" x="29" y="100" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">10</text><text id="k10159" data-model-id="k10160" x="29" y="79" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">12</text><text id="k10157" data-model-id="k10158" x="29" y="58" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">14</text><text id="k10049" data-model-id="k10042" x="29" y="37" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">16</text><text id="k10090" data-model-id="k10091" x="29" y="16" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">18</text><g transform="matrix(6.123233995736766e-17,-1,1,6.123233995736766e-17,-90,134.5)"><text x="10" y="111" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">device</text></g></g><g><path style="display: block; " data-model-id="k10089" d="M91.5 225.5 98.5 225.5 98.5 232.5 91.5 232.5 z" stroke="#2196f3" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#2196f3"></path><text id="k10088" data-model-id="k10089" x="105" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">Device end of support</text><path style="display: block; cursor: pointer;" data-model-id="k10089" d="M90 221 222 221 222 235 90 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><path style="display: block; " data-model-id="k10087" d="M229.5 225.5 236.5 225.5 236.5 232.5 229.5 232.5 z" stroke="#f1c40f" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#f1c40f"></path><text id="k10086" data-model-id="k10087" x="243" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">Device end of sale</text><path style="display: block; cursor: pointer;" data-model-id="k10087" d="M228 221 342 221 342 235 228 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><path style="display: block; " data-model-id="k10085" d="M349.5 225.5 356.5 225.5 356.5 232.5 349.5 232.5 z" stroke="#e74c3c" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#e74c3c"></path><text id="k10084" data-model-id="k10085" x="363" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">IOS end of support</text><path style="display: block; cursor: pointer;" data-model-id="k10085" d="M348 221 464 221 464 235 348 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path><path style="display: block; " data-model-id="k10194" d="M471.5 225.5 478.5 225.5 478.5 232.5 471.5 232.5 z" stroke="#7c4dff" stroke-width="1" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" fill="#7c4dff"></path><text id="k10193" data-model-id="k10194" x="485" y="232" fill-opacity="1" style="font: 12px Arial,Helvetica,sans-serif; " fill="#232323">IOS end of sale</text><path style="display: block; cursor: pointer;" data-model-id="k10194" d="M470 221 568 221 568 235 470 235 z" stroke-linecap="square" stroke-linejoin="round" fill-opacity="0" stroke-opacity="1" fill="#fff"></path></g></svg></div><div id="containerGrafico4DivLoader" style="top: -125px; position: relative; background-image: url(&quot;/images/ajax-loader1.gif&quot;); width: 31px; height: 31px; z-index: 1000; margin: auto; display: none;"></div></div></div></div></div>
+
+            <script type="text/javascript">
+                $(document).ready(function(){
+                    $(function () {
+
+var p_url ='/grafici/datigrafico.aspx?cl=MyVemCS.NetInventory.Componenti.GraficoColonneAggiornamentiOdierni&guid=57e3f674-68b4-4276-8f6e-c5f9d768175b';
+var p_campi_schema={ x: { type: "string" }, y1: { type: "number"}, y2: { type: "number"}, y3: { type: "number"}, y4: { type: "number"}};
+var p_serie=[ { name: "pc nuovi registrati oggi", type: "column", field: "y1", overlay: {gradient: "none"}}, { name: "pc con modifiche black list", type: "column", field: "y2", overlay: {gradient: "none"}}, { name: "pc con modifiche hw", type: "column", field: "y3", overlay: {gradient: "none"}}, { name: "pc con modifiche sw", type: "column", field: "y4", overlay: {gradient: "none"}}];
+var p_legenda_valori='pc';
+var p_legenda_categorie='';
+var p_step_label_categorie=1;
+var p_formato_label_categorie='dd/MM';
+var p_formato_label_valori='n0';
+var p_formato_template_valori='';
+var p_titolo='Aggiornamenti odierni Net.Inventory';
+var p_tema='vem';
+var p_colori=['#2196f3', '#f1c40f', '#e74c3c', '#7c4dff', '#27ae60', '#e67e22', '#795548', '#bdc3c7', '#7f8c8d', '#2c3e50'];
+var p_tooltip_template='#= series.name #: #= kendo.toString(value, \'N0\' ) #';
+var p_tipo_categoria='category';
+var p_classe ='MyVemCS.NetInventory.Componenti.GraficoColonneAggiornamentiOdierni';
+var p_larghezza=0;
+var p_altezza=0;
+var p_timespan_assex_format='';
+var p_timespan_fra_serie=0;
+var p_dettaglio=2;
+var p_unita_valori=1;
+var p_unita_base_categorie='hours';
+var p_step_unita_base_categorie=1;
+var p_template_label_categorie='';
+var p_label_serie_visibili=false;
+var p_massimo_valori=-1;
+var p_rotazione_label_categorie=0;
+var p_label_categorie_visibili=false;
+var p_plot_area_click=function(e){window.location='../docum/home4.asp?goto=i'};
+
+    var chartContainerID = $("#containerGrafico1").attr('id');
+    var chartContainerObj = $("#" + chartContainerID);
+
+    function myChartProps() {
+        this.url = p_url;
+        this.campi_schema = p_campi_schema;
+        this.serie = p_serie;
+        this.legenda_valori = p_legenda_valori;
+        this.legenda_categorie = p_legenda_categorie;
+        this.step_label_categorie = p_step_label_categorie;
+        this.formato_label_categorie = p_formato_label_categorie;
+        this.formato_label_valori = p_formato_label_valori;
+        this.titolo = p_titolo;
+        this.tema = p_tema;
+        this.colori = p_colori;
+        this.tooltip_template = p_tooltip_template;
+        this.tipo_categoria = p_tipo_categoria;
+        this.classe = p_classe;
+        this.larghezza = p_larghezza;
+        this.altezza = p_altezza;
+        this.timespan_assex_format = p_timespan_assex_format;
+        this.timespan_fra_serie = p_timespan_fra_serie;
+        this.dettaglio = p_dettaglio;
+        this.unita_valori = p_unita_valori;
+        this.unita_base_categorie = p_unita_base_categorie;
+        this.step_unita_base_categorie = p_step_unita_base_categorie;
+        this.template_label_categorie = p_template_label_categorie;
+        this.label_serie_visibili = p_label_serie_visibili;
+        this.massimo_valori = p_massimo_valori;
+        this.rotazione_label_categorie = p_rotazione_label_categorie;
+        this.label_categorie_visibili = p_label_categorie_visibili;
+        this.plot_area_click = p_plot_area_click;
+        this.formato_template_valori = p_formato_template_valori;
+    }
+
+    var mcp = new myChartProps();
+    graficoColonne(chartContainerObj, chartContainerID, mcp);
+
+});
+$(function () {
+
+var p_url ='/grafici/datigrafico.aspx?cl=MyVemCS.NetInventory.Componenti.GraficoColonneAggiornamentoAgent&guid=18049cfe-9a33-4dcf-817e-d063b917798a';
+var p_campi_schema={ x: { type: "string" }, y1: { type: "number"}, y2: { type: "number"}, y3: { type: "number"}};
+var p_serie=[ { name: "inseriti manualmente", type: "column", field: "y1", overlay: {gradient: "none"}}, { name: "agent ultima ver.(3.016)", type: "column", field: "y2", overlay: {gradient: "none"}}, { name: "agent non aggiornati", type: "column", field: "y3", overlay: {gradient: "none"}}];
+var p_legenda_valori='pc';
+var p_legenda_categorie='';
+var p_step_label_categorie=1;
+var p_formato_label_categorie='dd/MM';
+var p_formato_label_valori='n0';
+var p_formato_template_valori='';
+var p_titolo='Stato aggiornamento agent';
+var p_tema='vem';
+var p_colori=['#2196f3', '#f1c40f', '#e74c3c', '#7c4dff', '#27ae60', '#e67e22', '#795548', '#bdc3c7', '#7f8c8d', '#2c3e50'];
+var p_tooltip_template='#= series.name #: #= kendo.toString(value, \'N0\' ) #';
+var p_tipo_categoria='category';
+var p_classe ='MyVemCS.NetInventory.Componenti.GraficoColonneAggiornamentoAgent';
+var p_larghezza=0;
+var p_altezza=0;
+var p_timespan_assex_format='';
+var p_timespan_fra_serie=0;
+var p_dettaglio=2;
+var p_unita_valori=1;
+var p_unita_base_categorie='hours';
+var p_step_unita_base_categorie=1;
+var p_template_label_categorie='';
+var p_label_serie_visibili=false;
+var p_massimo_valori=-1;
+var p_rotazione_label_categorie=0;
+var p_label_categorie_visibili=false;
+var p_plot_area_click=function(e){window.location='../docum/home4.asp?goto=i'};
+
+    var chartContainerID = $("#containerGrafico2").attr('id');
+    var chartContainerObj = $("#" + chartContainerID);
+
+    function myChartProps() {
+        this.url = p_url;
+        this.campi_schema = p_campi_schema;
+        this.serie = p_serie;
+        this.legenda_valori = p_legenda_valori;
+        this.legenda_categorie = p_legenda_categorie;
+        this.step_label_categorie = p_step_label_categorie;
+        this.formato_label_categorie = p_formato_label_categorie;
+        this.formato_label_valori = p_formato_label_valori;
+        this.titolo = p_titolo;
+        this.tema = p_tema;
+        this.colori = p_colori;
+        this.tooltip_template = p_tooltip_template;
+        this.tipo_categoria = p_tipo_categoria;
+        this.classe = p_classe;
+        this.larghezza = p_larghezza;
+        this.altezza = p_altezza;
+        this.timespan_assex_format = p_timespan_assex_format;
+        this.timespan_fra_serie = p_timespan_fra_serie;
+        this.dettaglio = p_dettaglio;
+        this.unita_valori = p_unita_valori;
+        this.unita_base_categorie = p_unita_base_categorie;
+        this.step_unita_base_categorie = p_step_unita_base_categorie;
+        this.template_label_categorie = p_template_label_categorie;
+        this.label_serie_visibili = p_label_serie_visibili;
+        this.massimo_valori = p_massimo_valori;
+        this.rotazione_label_categorie = p_rotazione_label_categorie;
+        this.label_categorie_visibili = p_label_categorie_visibili;
+        this.plot_area_click = p_plot_area_click;
+        this.formato_template_valori = p_formato_template_valori;
+    }
+
+    var mcp = new myChartProps();
+    graficoColonne(chartContainerObj, chartContainerID, mcp);
+
+});
+$(function () {
+
+var p_url ='/grafici/datigrafico.aspx?cl=MyVemCS.NetWatch.Componenti.GraficoColonneAllarmiAttivi&guid=f518b4c7-cf5d-4f25-a976-156cdc8bd974';
+var p_campi_schema={ x: { type: "string" }, y1: { type: "number"}, y2: { type: "number"}};
+var p_serie=[ { name: "Allarmi critici", type: "column", field: "y1", overlay: {gradient: "none"}}, { name: "Allarmi di media entità", type: "column", field: "y2", overlay: {gradient: "none"}}];
+var p_legenda_valori='Allarmi';
+var p_legenda_categorie='';
+var p_step_label_categorie=1;
+var p_formato_label_categorie='dd/MM';
+var p_formato_label_valori='n0';
+var p_formato_template_valori='';
+var p_titolo='Allarmi attivi';
+var p_tema='vem';
+var p_colori=[ "#e74c3c", "#f1c40f"];
+var p_tooltip_template='#= series.name #: #= kendo.toString(value, \'N0\' ) #';
+var p_tipo_categoria='category';
+var p_classe ='MyVemCS.NetWatch.Componenti.GraficoColonneAllarmiAttivi';
+var p_larghezza=0;
+var p_altezza=0;
+var p_timespan_assex_format='';
+var p_timespan_fra_serie=0;
+var p_dettaglio=2;
+var p_unita_valori=1;
+var p_unita_base_categorie='hours';
+var p_step_unita_base_categorie=1;
+var p_template_label_categorie='';
+var p_label_serie_visibili=false;
+var p_massimo_valori=-1;
+var p_rotazione_label_categorie=0;
+var p_label_categorie_visibili=false;
+var p_plot_area_click=function(e){window.location='./jumppgs/aatt.asp'};
+
+    var chartContainerID = $("#containerGrafico3").attr('id');
+    var chartContainerObj = $("#" + chartContainerID);
+
+    function myChartProps() {
+        this.url = p_url;
+        this.campi_schema = p_campi_schema;
+        this.serie = p_serie;
+        this.legenda_valori = p_legenda_valori;
+        this.legenda_categorie = p_legenda_categorie;
+        this.step_label_categorie = p_step_label_categorie;
+        this.formato_label_categorie = p_formato_label_categorie;
+        this.formato_label_valori = p_formato_label_valori;
+        this.titolo = p_titolo;
+        this.tema = p_tema;
+        this.colori = p_colori;
+        this.tooltip_template = p_tooltip_template;
+        this.tipo_categoria = p_tipo_categoria;
+        this.classe = p_classe;
+        this.larghezza = p_larghezza;
+        this.altezza = p_altezza;
+        this.timespan_assex_format = p_timespan_assex_format;
+        this.timespan_fra_serie = p_timespan_fra_serie;
+        this.dettaglio = p_dettaglio;
+        this.unita_valori = p_unita_valori;
+        this.unita_base_categorie = p_unita_base_categorie;
+        this.step_unita_base_categorie = p_step_unita_base_categorie;
+        this.template_label_categorie = p_template_label_categorie;
+        this.label_serie_visibili = p_label_serie_visibili;
+        this.massimo_valori = p_massimo_valori;
+        this.rotazione_label_categorie = p_rotazione_label_categorie;
+        this.label_categorie_visibili = p_label_categorie_visibili;
+        this.plot_area_click = p_plot_area_click;
+        this.formato_template_valori = p_formato_template_valori;
+    }
+
+    var mcp = new myChartProps();
+    graficoColonne(chartContainerObj, chartContainerID, mcp);
+
+});
+$(function () {
+
+var p_url ='/grafici/datigrafico.aspx?cl=MyVemCS.NetWatch.Componenti.GraficoColonneStatoAsset&guid=0fd763b0-2484-42a5-9707-0075ae3f8ed6';
+var p_campi_schema={ x: { type: "string" }, y1: { type: "number"}, y2: { type: "number"}, y3: { type: "number"}, y4: { type: "number"}};
+var p_serie=[ { name: "Device end of support", type: "column", field: "y1", overlay: {gradient: "none"} }, { name: "Device end of sale", type: "column", field: "y2", overlay: {gradient: "none"} }, { name: "IOS end of support", type: "column", field: "y3", overlay: {gradient: "none"} }, { name: "IOS end of sale", type: "column", field: "y4", overlay: {gradient: "none"} }];
+var p_legenda_valori='device';
+var p_legenda_categorie='';
+var p_step_label_categorie=1;
+var p_formato_label_categorie='dd/MM';
+var p_formato_label_valori='n0';
+var p_formato_template_valori='';
+var p_titolo='Stato assets';
+var p_tema='vem';
+var p_colori=['#2196f3', '#f1c40f', '#e74c3c', '#7c4dff', '#27ae60', '#e67e22', '#795548', '#bdc3c7', '#7f8c8d', '#2c3e50'];
+var p_tooltip_template='#= series.name #: #= kendo.toString(value, \'N0\' ) #';
+var p_tipo_categoria='category';
+var p_classe ='MyVemCS.NetWatch.Componenti.GraficoColonneStatoAsset';
+var p_larghezza=0;
+var p_altezza=0;
+var p_timespan_assex_format='';
+var p_timespan_fra_serie=0;
+var p_dettaglio=2;
+var p_unita_valori=1;
+var p_unita_base_categorie='hours';
+var p_step_unita_base_categorie=1;
+var p_template_label_categorie='';
+var p_label_serie_visibili=false;
+var p_massimo_valori=-1;
+var p_rotazione_label_categorie=0;
+var p_label_categorie_visibili=false;
+var p_plot_area_click=function(e){window.location='./jumppgs/aara.asp'};
+
+    var chartContainerID = $("#containerGrafico4").attr('id');
+    var chartContainerObj = $("#" + chartContainerID);
+
+    function myChartProps() {
+        this.url = p_url;
+        this.campi_schema = p_campi_schema;
+        this.serie = p_serie;
+        this.legenda_valori = p_legenda_valori;
+        this.legenda_categorie = p_legenda_categorie;
+        this.step_label_categorie = p_step_label_categorie;
+        this.formato_label_categorie = p_formato_label_categorie;
+        this.formato_label_valori = p_formato_label_valori;
+        this.titolo = p_titolo;
+        this.tema = p_tema;
+        this.colori = p_colori;
+        this.tooltip_template = p_tooltip_template;
+        this.tipo_categoria = p_tipo_categoria;
+        this.classe = p_classe;
+        this.larghezza = p_larghezza;
+        this.altezza = p_altezza;
+        this.timespan_assex_format = p_timespan_assex_format;
+        this.timespan_fra_serie = p_timespan_fra_serie;
+        this.dettaglio = p_dettaglio;
+        this.unita_valori = p_unita_valori;
+        this.unita_base_categorie = p_unita_base_categorie;
+        this.step_unita_base_categorie = p_step_unita_base_categorie;
+        this.template_label_categorie = p_template_label_categorie;
+        this.label_serie_visibili = p_label_serie_visibili;
+        this.massimo_valori = p_massimo_valori;
+        this.rotazione_label_categorie = p_rotazione_label_categorie;
+        this.label_categorie_visibili = p_label_categorie_visibili;
+        this.plot_area_click = p_plot_area_click;
+        this.formato_template_valori = p_formato_template_valori;
+    }
+
+    var mcp = new myChartProps();
+    graficoColonne(chartContainerObj, chartContainerID, mcp);
+
+});
+
+                });
+            </script>
+
+
+    
+
+
+   <script type="text/javascript" src="./vendor.js"></script>
+
+
+	<script type="text/javascript" src="./myvem.js"></script>
+
+
+    
+    
+    
+    <script type="text/javascript">
+        var addRow = false; //Serve per vedere se ho cliccato il modal dell'edit riga o quello dell'aggiungi riga
+
+        $(document).ready(function () {     //consente il caricamento di tutto il contenuto (date picker, radio button...) prima di mostrare la pagina
+            $('body').removeClass('hidden');
+
+            if ($('div.filter').children().length == 0) {
+                $('div.filter').hide();
+            }
+        });
+        </script>
+
+        
+
+        <script type="text/javascript">
+            var secondsAdded = 0;
+                        $(document).ready(function(){
+                $('.refreshComponenti').hover(function(){
+                    $(this).html('<img src="/images/svg/refreshWhite.svg"/ width="16" height="16">');
+                }, function(){
+                    $(this).html('<img src="/images/svg/refresh.svg"/ width="16" height="16">');
+                });
+                $('.refreshComponenti').click(function(){
+                    cambioDataRefresh();
+                });
+                        });
+
+            function loadp() {
+                var dl = document.getElementById('filterloading');
+                //document.location.href = '#';
+                dl.style.display = 'inline';
+                dl.style.zIndex = 3000;
+            }
+
+            function hidep() {
+                var dl = document.getElementById('filterloading');
+                dl.style.display = 'none';
+            }
+
+            function cambioDataRefresh() {
+                secondsAdded++;
+                dateFrom = $('#filterDateFrom').pickadate('picker');
+                dateTo = $('#filterDateTo').pickadate('picker');
+                timeFrom = $('#filterTimeFrom').pickatime('picker');
+                timeTo = $('#filterTimeTo').pickatime('picker');
+                stringDateI = dateFrom.get('select', 'mm/dd/yyyy') + " " + timeFrom.get('select', 'HH:i');
+                stringDateF = dateTo.get('select', 'mm/dd/yyyy') + " " + timeTo.get('select', 'HH:i');
+                dateI = new Date(stringDateI);
+                dateF = new Date(stringDateF);
+                dateFRefresh = new Date(dateF.getTime() + 1000*(10 + secondsAdded));
+                timeRangeChanged(dateI, dateFRefresh);
+            }
+        </script>
+
+        
+<script type="text/javascript">
+    $.jGrowl.defaults.position = 'top-left';
+</script>
+
+<script type="text/javascript">
+    function calltoast()
+    {
+        
+
+        /*
+        $.jGrowl('test1', {
+            
+        beforeClose: function(e, m) {
+                    readtoast(219);
+                }
+
+        , sticky: true });
+
+        $.jGrowl('test2', {
+            
+        beforeClose: function(e, m) {
+                    readtoast(219);
+                }
+
+        , sticky: true });
+        */
+    }
+
+    function readtoast(idn) {
+        //alert(id);
+        //simplereq(thisreq, './toast/readt.aspx', [['id', id]], 'readtoastcallback(' + id + ');', null);
+
+        $.ajax({
+	        type: "POST",
+	        url : "./toast/readt.aspx"
+	        ,dataType:'html'
+	        ,data:{
+			    id: idn
+			    ,timestamp: new Date().getTime()
+		    },
+	        success:function(risposta) {
+			    //elaborarisposta
+		    }
+	        ,error: function(risposta) {
+			    //errore ajax
+		    }
+	
+        })
+
+    }
+
+    function readtoastcallback(cid) {
+
+    }
+</script>
+<script type="text/javascript">
+calltoast();
+</script>
+
+
+
+        <div id="filterloading" style="position:absolute; display:none; left:0; top:0; width:100%; height:100%; background-color:rgba(255,255,255,.7);">
+        <img alt="" src="./loader.gif" style="width:auto; margin-left:auto;margin-right:auto; margin-top:200px; display:block;">
+        </div>
+
+        <div class="modal modal-help fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="helpModalTitle" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h2 id="helpModalTitle" class="modal-title">my.vem help</h2>
+					</div>
+					<div class="modal-body">
+                        
+                        
+						<div><button class="btn btn-default" type="button" data-dismiss="modal" onclick="edithlp();">EDIT</button></div>
+                        <hr>
+                        
+                                                
+                        <div id="helpbody">
+                        Loading...
+                        </div>
+
+                    </div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Chiudi</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+        <script type="text/javascript">
+            function edithlp(){
+
+                var c = 'https://nms.vg/dashboard/index.aspx';
+                var p = '~/dashboard/index.aspx';
+
+                document.location.href = '/help/edith.aspx?cpage=' + encodeURI(c) + '&pkey=' + encodeURI(p);
+            }
+
+            
+
+            $('#helpModal').on('shown.bs.modal', function () {
+
+                $.ajax({
+                    type: "GET",
+                    url: "/help/loadh.aspx"
+			        , dataType: 'text' //xml, json, script, html, text
+			        , data: {
+			            hk: '~/dashboard/index.aspx'
+			            , timestamp: new Date().getTime()
+			        }
+                    , success: function (r) {
+                        var risp = $.parseJSON(r);
+                        //elab(risp);
+                        if ($.trim(risp).length > 0) {
+                            $("#helpbody").html(risp.snippet);
+                        }
+                    }
+		            , error: function (r) {
+		                $("#helpbody").html('errore caricamento help');
+		            }
+                });
+
+            });
+
+          
+
+        </script>
+
+
+
+</body></html>
