@@ -16,7 +16,10 @@ $(document).ready(function(){
         http_request = new XMLHttpRequest();
         http_request.onreadystatechange = function(){
             if(http_request.readyState == XMLHttpRequest.DONE){
-                alert(http_request.responseText);
+                var json = JSON.parse(http_request.responseText);
+                console.log(json)
+                // alert(json["fulfillment"]["speech"]);
+                // alert(json.fulfillment.speech);
             }
         };
         http_request.open("POST", "http://turing2019.azurewebsites.net/api/Chat");
