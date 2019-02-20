@@ -19,12 +19,12 @@ $(document).ready(function(){
                 alert(http_request.responseText);
             }
         };
-        http_request.open("POST", "http://fitstic2019-001-site1.etempurl.com/api/Chat");
+        http_request.open("POST", "http://turing2019.azurewebsites.net/api/Chat");
         http_request.withCredentials = false;
         // http_request.setRequestHeader("Access-Control-Allow-Headers", "*")
         http_request.setRequestHeader("Content-Type", "application/json");
         // http_request.setRequestHeader("Access-Control-Allow-Origin", "*");
-        http_request.send("ciao");
+        http_request.send("\"ciao\"");
     });
 
     // const postBtn = document.getElementById('post-btn');
